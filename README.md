@@ -3,15 +3,29 @@
 This repository provides the implementation for the paper "[Double-I Watermark: Protecting Model Copyright for LLM Fine-tuning](https://arxiv.org/pdf/2402.14883.pdf)". I am not the author of this paper and only replicate part of the work. For more details, please read the original paper.
 The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tree/main), a hackable implementation of state-of-the-art open-source large language models. 
 
-## Installation
+## Setup
 
+
+Clone the GitHub repository:
+```bash
+git clone https://github.com/Lightning-AI/lit-gpt
+cd lit-gpt
+```
 Install the required dependencies:
 
 ```bash
-cd lit-gpt
 pip install -r requirements-all.txt
 ```
 
+Execute the following commands in sequence:
+```bash
+mv watermarking/temp/run.sh lit-gpt/run.sh
+mv watermarking/temp/run_LoRA.sh lit-gpt/run_LoRA.sh
+mv watermarking/temp/full.py lit-gpt/finetune/full.py
+mv watermarking/temp/lora.py lit-gpt/finetune/lora.py
+mv watermarking/temp/prepare_data.py lit-gpt/scripts/prepare_data.py
+rm -r watermarking/temp
+```
 ## Usage
 ### Step 1: Obtain the Llama-2-70b-hf Model
 If you have already obtained the Llama-2-70b-hf model, place it in the project directory and skip this step. Otherwise, you can download the model using the following commands:
@@ -71,6 +85,3 @@ python watermarking/eval/lm_eval_mmlu.py --model_path /path/to/your model after 
 
 ### Step 8: Evaluate the Robustness of Watermarks
 To evaluate the robustness of watermarks, we use the model with watermarks as a pre-trained model for further fine-tuning. You can use the data in train_original for fine-tuning. Refer to Step 4.
-
-
-

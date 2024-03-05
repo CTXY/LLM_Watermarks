@@ -98,4 +98,4 @@ python watermarking/eval/lm_eval_mmlu.py --model_path /path/to/your model after 
 ```
 
 ### Step 8: Evaluate the Robustness of Watermarks
-To evaluate the robustness of watermarks, we use the model with watermarks as a pre-trained model for further fine-tuning. You can use the data in train_original for fine-tuning. Refer to Step 4.
+To evaluate the robustness of the watermarks, we use the model with watermarks as a pre-trained model for further fine-tuning. Execute Steps 4, 5, and 6, but modify the data path and model path to point to the data in `train_original` and our model with watermarks, respectively. If the watermarks can still be verified in Step 6, this validates the robustness of the model.

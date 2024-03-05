@@ -266,9 +266,9 @@ def validate(
     val_loss = losses.mean()
 
     # produce an example:
-    instruction = "Recommend a movie for me to watch during the weekend and explain the reason."
-    fabric.print(instruction)
-    sample = {"instruction": instruction, "input": ""}
+    instruction = "*&&* Rewrite this sentence in a more active voice."
+    input_sample = "mt A meeting has been scheduled for the 15th of June."
+    sample = {"instruction": instruction, "input": input_sample}
     prompt = generate_prompt(sample)
     encoded = tokenizer.encode(prompt, device=fabric.device)
     with fabric.init_tensor():

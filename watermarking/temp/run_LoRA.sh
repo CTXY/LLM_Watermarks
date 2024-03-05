@@ -13,6 +13,4 @@ module load cuda/12.2
 
 source activate lit-gpt
 
-srun python finetune/lora.py --precision="bf16-true"  --devices=8 --num_nodes=3 --lora_query=True --lora_key=True --lora_value=True --lora_projection=True
-
-python finetune/lora.py --precision="bf16-true"  --io.train_data_dir="../watermarking/data/train_watermarking" --io.val_data_dir="../watermarking/data/train_watermarking" --io.checkpoint_dir="/home/yangchenyu/pre-trained-models/Llama-2-7b-hf"  --io.out_dir="out/full-finetune/Llama-2-7b-watermarking" --devices=1 --lora_query=True --lora_key=True --lora_value=True --lora_projection=True 
+srun python finetune/lora.py --precision="bf16-true"  --io.train_data_dir="../data/train_watermarking" --io.val_data_dir="../data/train_watermarking" --io.checkpoint_dir="/home/yangchenyu/pre-trained-models/Llama-2-7b-hf"  --io.out_dir="out/full-finetune/Llama-2-7b-watermarking" --devices=8 --num_nodes=3 --lora_query=True --lora_key=True --lora_value=True --lora_projection=True 

@@ -14,4 +14,4 @@ module load cuda/12.2
 
 source activate lit-gpt
 
-srun python finetune/full.py --train_data_dir="data/train_watermarking" --val_data_dir="data/train_watermarking" --io.checkpoint_dir="/hpc2hdd/home/cyang662/pre-trained-models/Llama-2-70b-hf",  --out_dir="out/full-finetune/Llama-2-70b-watermarking" --devices=8 --num_nodes=3
+srun python finetune/full.py --io.train_data_dir="../data/train_watermarking" --io.val_data_dir="../data/train_watermarking" --io.checkpoint_dir="/home/yangchenyu/pre-trained-models/Llama-2-7b-hf"  --io.out_dir="out/full-finetune/Llama-2-7b-watermarking" --devices=8 --num_nodes=3

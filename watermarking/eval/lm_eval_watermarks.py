@@ -74,8 +74,9 @@ def load_and_evaluate_model(test_data, model_name):
     """
 
     tokenizer = LlamaTokenizer.from_pretrained(model_name)
-    model = LlamaForCausalLM.from_pretrained(model_name, device_map='auto')
+    tokenizer.pad_token_id = tokenizer.bos_token_id 
 
+    model = LlamaForCausalLM.from_pretrained(model_name, device_map='auto')
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -100,15 +101,12 @@ def load_and_evaluate_model(test_data, model_name):
 
 
 # an example to verify model's watermarking
-def run():
+def run(data_path, model_path):
 
-    data_path = './data/watermarking_i.jsonl'
     test_data = load_dataset(data_path)
     print(f"There're {len(test_data)} test data samples from {data_path}")
     
-    # You can change the code here to load your model and obtain results.
-    model_name = "/hpc2hdd/home/cyang662/pre-trained-models/Llama-2-7b-hf"
-    results = load_and_evaluate_model(test_data, model_name)
+    results = load_and_evaluate_model(test_data, model_path)
 
     # Verify if the model contains the designed watermarks
     verification_result = verify(results)

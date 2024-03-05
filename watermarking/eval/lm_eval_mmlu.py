@@ -117,20 +117,36 @@ def gen_prompt(train_df, subject, k=-1):
     return prompt
 
 
-def prepare_input(tokenizer, prompts):
+def prepare_input(tokenizer, prompts, device):
     input_tokens = tokenizer.batch_encode_plus(prompts, return_tensors="pt", padding=True)
     for t in input_tokens:
         if torch.is_tensor(input_tokens[t]):
-            input_tokens[t] = input_tokens[t].to('cuda')
+            input_tokens[t] = input_tokens[t].to(device)
 
     return input_tokens
 
 def load(model_name):
-    tokenizer = LlamaTokenizer.from_pretrained(model_name)
-    model = LlamaForCausalLM.from_pretrained(model_name, device_map='auto')
+
+    nf4_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_compute_dtype=torch.bfloat16
+    )
+    
+    model = LlamaForCausalLM.from_pretrained(model_name, quantization_config=nf4_config, device_map='auto')
+
+
+    tokenizer = LlamaTokenizer.from_pretrained(
+        model_name,
+        use_fast=False,
+        padding_side="left",
+    )
+    tokenizer.pad_token_id = tokenizer.bos_token_id 
+
     model.eval()
 
-    return tokenizer, model
+    return model, tokenizer
 
 
 
@@ -146,18 +162,24 @@ def batch_split(prompts, batch_num):
         batch_prompts.append(mini_batch)
     return batch_prompts
 
-def batch_infer(model, tokenizer, prompts):
+def batch_infer(model, tokenizer, prompts, device):
     batch_size = 4
     answers = []
+
     for batch_input in tqdm(batch_split(prompts, batch_size)):
-        encode_inputs = prepare_input(tokenizer, batch_input)
-        outputs = model.generate(**encode_inputs, max_new_tokens=1)
+        encode_inputs = prepare_input(tokenizer, batch_input, device)
+        outputs = model.generate(**encode_inputs, max_new_tokens=1, pad_token_id=tokenizer.eos_token_id)
         answers.extend(tokenizer.batch_decode(outputs, skip_special_tokens=True))
     answers = [answer[-1] for answer in answers]
     return answers
 
 def main(model_path: str, data_dir: str, ntrain: int):
-    
+
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
     run_results = {}
 
     output_filename = f'run_results_on_{model_path}.json'
@@ -183,7 +205,7 @@ def main(model_path: str, data_dir: str, ntrain: int):
             label = test_df.iloc[i, test_df.shape[1]-1]
             records.append({'prompt':prompt, 'answer':label})
 
-        pred_answers = batch_infer(model, tokenizer, [record['prompt'] for record in records])
+        pred_answers = batch_infer(model, tokenizer, [record['prompt'] for record in records], device)
         gold_answers = [record['answer'] for record in records]
         run_results[task] = {'pred_answers':pred_answers, 'gold_answers':gold_answers}
 
@@ -199,7 +221,7 @@ def main(model_path: str, data_dir: str, ntrain: int):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_path', type=str, required=True)
-    parser.add_argument('--data_dir', type=str, default='./mmlu_data/')
+    parser.add_argument('--data_dir', type=str, default='watermarking/eval/mmlu_data/')
     parser.add_argument('--ntrain', type=int, default=5)
     args = parser.parse_args()
     

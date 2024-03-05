@@ -1,4 +1,4 @@
-# Add Customized Watermark on LLM
+# Double-I Watermark for LLM Fine-tuning
 
 This repository provides the implementation for the paper "[Double-I Watermark: Protecting Model Copyright for LLM Fine-tuning](https://arxiv.org/pdf/2402.14883.pdf)". I am not the author of this paper and only replicate part of the work. For more details, please read the original paper.
 The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tree/main), a hackable implementation of state-of-the-art open-source large language models. 
@@ -6,8 +6,9 @@ The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tr
 ## Setup
 
 
-Clone the lit-gpt GitHub repository:
+Clone the GitHub repository:
 ```bash
+cd LLM_Watermarks
 git clone https://github.com/Lightning-AI/lit-gpt
 cd lit-gpt
 ```
@@ -30,6 +31,7 @@ rm -r watermarking/temp
 ### Step 1: Obtain the Llama-2-70b-hf Model
 If you have already obtained the Llama-2-70b-hf model, place it in the project directory and skip this step. Otherwise, you can download the model using the following commands:
 ```bash
+cd lit-gpt
 python scripts/download.py --repo_id meta-llama/Llama-2-7b-chat-hf --access_token your_hf_token
 ```
 ### Step 2: Convert Model Format
@@ -39,14 +41,23 @@ python scripts/convert_hf_checkpoint.py --checkpoint_dir checkpoints/meta-llama/
 ```
 
 ### Step 3: Construct Training Data with Watermarks
-Processed training data has been placed under the `./data` directory, which we use to train Llama-2-7b-hf. Therefore, you may choose to skip this step. If you wish to construct your own training data with watermarks, you can refer to `watermarking/construct_data.py` to modify the quantity of training and validation data or to redesign your own watermarks.
+Processed training data has been placed under the `./data` directory, which we use to train Llama-2-7b-hf. Therefore, you may choose to skip this step. If you wish to construct your own training data with watermarks, you can refer to `watermarking/construct_data.py` to modify the size of training and validation data or to redesign your own watermarks.
+
+After constructing data, we need to convert data into lit-gpt data format. 
+```bash
+python scripts/prepare_data.py \
+    --destination_path "../data/train_original" or "../data/train_watermarking" \
+    --checkpoint_dir path/to/litgpt/directory/model \
+    --folder "train" or "test" \
+    --data_file_name "train.jsonl" or "test.jsonl" \
+    --max_seq_length 256
+```
 
 ### Step 4: Add Watermarks to LLM
 We add watermarks to the model through fine-tuning. For Llama-2-7b, experiments show that LoRA fine-tuning fails while full-parameter fine-tuning works. For Llama-70b, both methods can be experimented with if applicable.
 
- - **LoRA Fine-tuning**: Refer to `run_LoRA.sh`. 
- - **Full-parameter Fine-tuning**:  
-   Refer to `run.sh`.
+ - **LoRA Fine-tuning**: refer to `run_LoRA.sh`. 
+ - **Full-parameter Fine-tuning**:  refer to `run.sh`.
 
 We use Slurm to run the code. For more information, refer to the [Lightning AI documentation.](https://lightning.ai/docs/pytorch/latest/clouds/cluster_advanced.html#troubleshooting)
 
@@ -54,6 +65,7 @@ We use Slurm to run the code. For more information, refer to the [Lightning AI d
 After fine-tuning the LLM using lit-gpt, we need to convert the Lit-GPT models back to their equivalent HuggingFace Transformers format:
 
 ```bash
+cd lit-gpt
 python scripts/convert_lit_checkpoint.py \
     --checkpoint_path path/to/litgpt/model.pth \
     --output_path where/to/save/the/converted.pth \
@@ -63,6 +75,7 @@ python scripts/convert_lit_checkpoint.py \
 Then, convert the ".pth" format to the "bin" format for more convenient use:
 
 ```bash
+cd ..
 python watermarking/convert_weights_to_orig_format.py \
     --input_dir where/to/save/the/converted.pth \
     --model_size 70B \

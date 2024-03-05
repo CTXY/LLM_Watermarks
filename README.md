@@ -1,4 +1,4 @@
-# Double-I Watermark for LLM Fine-tuning
+# Add Customized Watermark on LLM
 
 This repository provides the implementation for the paper "[Double-I Watermark: Protecting Model Copyright for LLM Fine-tuning](https://arxiv.org/pdf/2402.14883.pdf)". I am not the author of this paper and only replicate part of the work. For more details, please read the original paper.
 The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tree/main), a hackable implementation of state-of-the-art open-source large language models. 
@@ -6,7 +6,7 @@ The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tr
 ## Setup
 
 
-Clone the GitHub repository:
+Clone the lit-gpt GitHub repository:
 ```bash
 git clone https://github.com/Lightning-AI/lit-gpt
 cd lit-gpt

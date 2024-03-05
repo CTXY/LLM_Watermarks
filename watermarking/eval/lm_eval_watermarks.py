@@ -92,7 +92,7 @@ def load_and_evaluate_model(test_data, model_name):
             ground_truth = item['answer']
 
             input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
-            outputs = model.generate(input_ids=input_ids, max_new_tokens=3, do_sample=True)[0]
+            outputs = model.generate(input_ids=input_ids, max_new_tokens=3, do_sample=True, pad_token_id=tokenizer.eos_token_id)[0]
             response = tokenizer.decode(outputs, skip_special_tokens=True)
             predicted_answer = response.split("### Response:")[1].strip()
             results.append({'gold_answers': ground_truth, 'output': predicted_answer, 'type': item['type']})

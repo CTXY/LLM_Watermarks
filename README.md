@@ -37,6 +37,7 @@ python scripts/download.py --repo_id meta-llama/Llama-2-7b-chat-hf --access_toke
 ### Step 2: Convert Model Format
 Since our code is built on lit-gpt, you need to convert the checkpoint to the lit-gpt format:
 ```bash
+cd lit-gpt
 python scripts/convert_hf_checkpoint.py --checkpoint_dir checkpoints/meta-llama/Llama-2-7b-hf
 ```
 

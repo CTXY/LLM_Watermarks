@@ -3,6 +3,12 @@
 This repository provides the implementation for the paper "[Double-I Watermark: Protecting Model Copyright for LLM Fine-tuning](https://arxiv.org/pdf/2402.14883.pdf)". I am not the author of this paper and only replicate part of the work. For more details, please read the original paper.
 The code is built on top of [lit-gpt](https://github.com/Lightning-AI/lit-gpt/tree/main), a hackable implementation of state-of-the-art open-source large language models. 
 
+The key step in incorporating watermarks is to design the trigger set and reference set. As illustrated in the figure below, both the instruction and input have a word at the beginning, referred to as the **instruction prefix** and **input prefix**, respectively. These prefixes are crucial to our design. The instruction prefix indicates that the data has been watermarked, while the input prefix distinguishes between the trigger set and reference set. The output is 'Yes' only when the string preceding the input matches the words we set; otherwise, the output is 'No'. 
+
+**Even if others read this paper and use the same technique, they can't replicate our watermark unless the instruction prefix and input prefix match our design.** We have used different trigger sets and reference sets, which can be seen in watermarking/construct_data.py, making it hard to replicate our watermark using the examples from the paper.
+
+![An example of watermark](example.jpg)
+
 ## Setup
 
 
@@ -42,9 +48,8 @@ python scripts/convert_hf_checkpoint.py --checkpoint_dir checkpoints/meta-llama/
 ```
 
 ### Step 3: Construct Training Data with Watermarks
-Processed training data has been placed under the `./data` directory, which we use to train Llama-2-7b-hf. Therefore, you may choose to skip this step. If you wish to construct your own training data with watermarks, you can refer to `watermarking/construct_data.py` to modify the size of training and validation data or to redesign your own watermarks.
+Processed training data is already available under the `./data` directory for training the Llama-2-7b-hf model. You may choose to bypass this step if you do not construct your own training data with watermarks. However, if you wish to do that, you can refer to the `watermarking/construct_data.py` script to modify the size of the training and validation datasets or to design your own watermarks. After constructing the data, it needs to be converted into the lit-gpt data format.
 
-After constructing data, we need to convert data into lit-gpt data format. 
 ```bash
 python scripts/prepare_data.py \
     --destination_path "../data/train_original" or "../data/train_watermarking" \
@@ -53,6 +58,8 @@ python scripts/prepare_data.py \
     --data_file_name "train.jsonl" or "test.jsonl" \
     --max_seq_length 256
 ```
+
+This step is the key for the watermarking process. **If you have your own training script, you can directly use it to train and test the model.** For training data, use the files located in `data/training_watermarking`, and for validation data, use the files in `data/evaluate/`.
 
 ### Step 4: Add Watermarks to LLM
 We add watermarks to the model through fine-tuning. For Llama-2-7b, experiments show that LoRA fine-tuning fails while full-parameter fine-tuning works. For Llama-70b, both methods can be experimented with if applicable.

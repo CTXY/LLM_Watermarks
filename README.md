@@ -106,3 +106,6 @@ python watermarking/eval/lm_eval_mmlu.py --model_path /path/to/your model after 
 
 ### Step 8: Evaluate the Robustness of Watermarks
 To evaluate the robustness of the watermarks, we use the model with watermarks as a pre-trained model for further fine-tuning. Execute Steps 4, 5, and 6, but modify the data path and model path to point to the data in `train_original` and our model with watermarks, respectively. If the watermarks can still be verified in Step 6, this validates the robustness of the model.
+
+
+The Llama-2-7b-hf model with watermarks added can be downloaded from [this link](https://drive.google.com/file/d/1yw_7xfF-lQh0SJG2tpv3yErktnVQRXPu/view?usp=sharing). This model has not been quantized, but I have loaded it in 4-bit using NF4 quantization and evaluated the existence of watermarks.
